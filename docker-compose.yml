@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  server:
+    image: node:latest
+    volumes:
+      - ./server:/app
+    working_dir: /app
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+    env_file:
+      - server/.env.sample
+
+  database:
+    image: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432 #port on host:port in container
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: quiz
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U root -d quiz" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+    postgres-data: {}
