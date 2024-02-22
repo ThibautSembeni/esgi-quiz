@@ -8,8 +8,8 @@ import { OptionModule } from './modules/option/option.module';
 import { ParticipationModule } from './modules/participation/participation.module';
 import { QuestionModule } from './modules/question/question.module';
 import { UserModule } from './modules/user/user.module';
-import { AuthService } from './modules/auth/services/auth.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { SessionModule } from './modules/session/session.module';
 
 @Module({
   imports: [
@@ -21,6 +21,7 @@ import { AuthModule } from './modules/auth/auth.module';
     QuestionModule,
     UserModule,
     AuthModule,
+    SessionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
