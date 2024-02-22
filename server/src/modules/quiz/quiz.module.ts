@@ -16,5 +16,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
       useClass: JwtAuthGuard,
     },
   ],
+  exports: [QuizService],
 })
 export class QuizModule {}

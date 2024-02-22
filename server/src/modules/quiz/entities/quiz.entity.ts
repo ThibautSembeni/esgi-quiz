@@ -1,8 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Question } from '../../question/entities/question.entity';
 import { Participation } from '../../participation/entities/participation.entity';
-import { Option } from '../../option/entities/option.entity';
-import { Answer } from '../../answer/entities/answer.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Quiz {
@@ -17,4 +22,7 @@ export class Quiz {
 
   @OneToMany(() => Participation, (participation) => participation.quiz)
   participations: Participation[];
+
+  @ManyToOne(() => User)
+  user: User;
 }
