@@ -18,7 +18,7 @@ export class SessionGateway
 
   private logger: Logger = new Logger('SessionGateway');
 
-  @SubscribeMessage('session-id')
+  @SubscribeMessage('join')
   handleMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() session_id: string,

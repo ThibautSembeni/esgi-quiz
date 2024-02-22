@@ -11,10 +11,8 @@ export default function Home() {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const quizzId = formData.get("quizz_id");
-    if (typeof quizzId === "string") {
-      router.push(`/quiz/${quizzId}`);
-    }
+    const sessionId = formData.get("session-id");
+    router.push(`/session?session=${sessionId}`);
   };
 
   return (
@@ -45,13 +43,13 @@ export default function Home() {
               className="mt-5 flex items-center justify-center gap-x-2 flex-col space-y-2"
               onSubmit={handleFormSubmit}
             >
-              <label htmlFor="quizz_id" className="sr-only">
+              <label htmlFor="session-id" className="sr-only">
                 Code pin du quiz
               </label>
               <input
-                type="quizz_id"
-                name="quizz_id"
-                id="quizz_id"
+                type="session-id"
+                name="session-id"
+                id="session-id"
                 required={true}
                 className="block w-1/2 rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
