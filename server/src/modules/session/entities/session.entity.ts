@@ -18,4 +18,11 @@ export class Session {
 
   @ManyToOne(() => Quiz)
   quiz: Quiz;
+
+  @Column({
+    type: 'enum',
+    enum: ['inactive', 'started', 'finish'],
+    default: 'inactive',
+  })
+  status: string;
 }

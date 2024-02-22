@@ -5,8 +5,8 @@ import { SessionController } from './controllers/session.controller';
 import { SessionService } from './services/session.service';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { QuizService } from '../quiz/services/quiz.service';
 import { QuizModule } from '../quiz/quiz.module';
+import { SessionGateway } from './gateway/session.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Session]), QuizModule],
@@ -17,6 +17,7 @@ import { QuizModule } from '../quiz/quiz.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    SessionGateway,
   ],
 })
 export class SessionModule {}
