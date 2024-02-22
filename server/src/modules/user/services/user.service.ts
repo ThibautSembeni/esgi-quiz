@@ -18,7 +18,7 @@ export class UserService {
     return await this.userRepository.findOne(options);
   }
 
-  async create(user: User): Promise<User> {
+  async create(user: { username: string; password: string }): Promise<User> {
     return await this.userRepository.save(user);
   }
 }
