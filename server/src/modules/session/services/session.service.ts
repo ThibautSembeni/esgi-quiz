@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Session } from '../entities/session.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { CreateSessionDto } from '../dto/create-session.dto';
 import { User } from '../../user/entities/user.entity';
 import Sqids from 'sqids';
@@ -33,5 +33,12 @@ export class SessionService {
     const result = { ...savedSession, creator: creatorWithoutPassword };
 
     return result;
+  }
+
+  async findOne(options: FindOneOptions<Session>): Promise<Session> {
+    return await this.sessionRepository.findOne({
+      ...options,
+      relations: ['quiz'],
+    });
   }
 }
