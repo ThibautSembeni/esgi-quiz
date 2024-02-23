@@ -64,12 +64,30 @@ export class SessionGateway
     }
     const currentSession = await this.findSession(data.session);
     if (user.id === currentSession.creator.id) {
-      this.logger.log(
-        `Start session: ${JSON.stringify(
-          data,
-        )}, currentSession: ${JSON.stringify(currentSession)}`,
-      );
       await this.updateSession(data.session, SessionStatus.STARTED);
+    }
+  }
+
+  @UseGuards(WsJwtAuthGuard)
+  @SubscribeMessage('finish-session')
+  async handleFinishSession(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { session: string },
+  ): Promise<void> {
+    const user: User = (client?.handshake as any)?.user;
+    if (!user) {
+      this.logger.error('User not found');
+      client.emit('unauthorized');
+      return;
+    }
+    if (!data.session) {
+      this.logger.error('Session not found');
+      client.emit('session_not_found');
+      return;
+    }
+    const currentSession = await this.findSession(data.session);
+    if (user.id === currentSession.creator.id) {
+      await this.updateSession(data.session, SessionStatus.FINISH);
     }
   }
 
