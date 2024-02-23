@@ -15,7 +15,7 @@ interface NavbarProps {
 }
 export default function Navbar({ className, children }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <header className={`absolute inset-x-0 top-0 z-50 ${className}`}>
@@ -56,13 +56,20 @@ export default function Navbar({ className, children }: NavbarProps) {
             ))}
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          {!isAuthenticated && (
+          {!isAuthenticated ? (
             <Link
               href="/auth/login"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
               Se connecter <span aria-hidden="true">&rarr;</span>
             </Link>
+          ) : (
+            <button
+              onClick={logout}
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Se déconnecter
+            </button>
           )}
         </div>
       </nav>

@@ -11,6 +11,7 @@ interface AuthContextProps {
   user: User | null;
   login: (username: string, password: string) => void;
   register: (username: string, password: string) => void;
+  logout?: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextProps>({
   user: null,
   login: (username: string, password: string) => {},
   register: (username: string, password: string) => {},
+  logout: () => {},
 } as AuthContextProps);
 
 export const useAuth = () => {
@@ -118,6 +120,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
   };
 
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    setIsAuthenticated(false);
+    router.push("/");
+  };
+
   useEffect(() => {
     checkUser();
   }, []);
@@ -131,6 +139,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isLoading,
         error,
         register,
+        logout,
       }}
     >
       {children}
