@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Quiz } from '../entities/quiz.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { CreateQuizDto } from '../dto/create-quiz.dto';
 import { User } from '../../user/entities/user.entity';
 
@@ -16,8 +16,8 @@ export class QuizService {
     return await this.quizRepository.save(createQuizDto);
   }
 
-  async findAll(): Promise<Quiz[]> {
-    return await this.quizRepository.find();
+  async findAll(options: FindManyOptions<Quiz>): Promise<Quiz[]> {
+    return await this.quizRepository.find(options);
   }
 
   async findOne(options: FindOneOptions<Quiz>): Promise<Quiz> {

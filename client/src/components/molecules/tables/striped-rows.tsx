@@ -47,6 +47,7 @@ export default function StripedRows({
                     if (index === 0) {
                       return (
                         <th
+                          key={index}
                           scope="col"
                           className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
                         >
@@ -56,6 +57,7 @@ export default function StripedRows({
                     } else {
                       return (
                         <th
+                          key={index}
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
@@ -76,30 +78,41 @@ export default function StripedRows({
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {bodyRows.map((value, index) => (
-                  <tr key={value} className="even:bg-gray-50">
-                    {index === 0 ? (
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3">
-                        {value}
-                      </td>
-                    ) : (
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {value}
-                      </td>
-                    )}
+                {bodyRows.length > 0 ? (
+                  bodyRows.map((value, index) => (
+                    <tr key={index} className="even:bg-gray-50">
+                      {index === 0 ? (
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3">
+                          {value}
+                        </td>
+                      ) : (
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {value}
+                        </td>
+                      )}
 
-                    {editButton && (
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
-                        <Link
-                          href={editLink}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          {editButtonLabel}
-                        </Link>
-                      </td>
-                    )}
+                      {editButton && (
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
+                          <Link
+                            href={editLink}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            {editButtonLabel}
+                          </Link>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={headersColumns.length + 1}
+                      className="text-center py-4 text-sm text-gray-500"
+                    >
+                      No data available
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

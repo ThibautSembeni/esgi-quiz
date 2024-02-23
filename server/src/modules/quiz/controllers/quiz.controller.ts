@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { QuizService } from '../services/quiz.service';
 import { CreateQuizDto } from '../dto/create-quiz.dto';
@@ -21,8 +22,10 @@ export class QuizController {
   }
 
   @Get()
-  async findAll() {
-    return await this.quizService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.quizService.findAll({
+      where: { user: req.user },
+    });
   }
 
   @Get(':id')
