@@ -1,3 +1,4 @@
 import { User } from "./user";
 import { Login, Register } from "./auth";
-export type { User, Login, Register };
+import { Quiz } from "./quiz";
+export type { User, Login, Register, Quiz };
