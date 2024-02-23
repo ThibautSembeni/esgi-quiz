@@ -8,12 +8,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject, Logger, Req, UseGuards } from '@nestjs/common';
 import { ParticipationService } from '../../participation/services/participation.service';
 import { SessionService } from '../services/session.service';
 import { UserService } from '../../user/services/user.service';
 import { User } from '../../user/entities/user.entity';
-import { Session } from '../entities/session.entity';
+import { Session, SessionStatus } from '../entities/session.entity';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { WsJwtStrategy } from '../../auth/ws-jwt.strategy';
+import { WsJwtAuthGuard } from '../../auth/ws-jwt-auth.guard';
+import { session } from 'passport';
 
 @WebSocketGateway({ cors: true, namespace: 'session' })
 export class SessionGateway
@@ -22,7 +26,6 @@ export class SessionGateway
   @WebSocketServer() server: Server;
 
   private logger: Logger = new Logger('SessionGateway');
-  private session_id: string;
 
   constructor(
     @Inject(SessionService)
@@ -34,13 +37,40 @@ export class SessionGateway
   ) {}
 
   @SubscribeMessage('join')
-  handleMessage(
+  async handleMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { session_id: string; username: string },
-  ): void {
+  ): Promise<void> {
     this.logger.log(`Payload: ${JSON.stringify(data)}`);
-    this.session_id = data.session_id;
-    this.registerSession(client, data.username);
+    await this.registerSession(client, data.username, data.session_id);
+  }
+
+  @UseGuards(WsJwtAuthGuard)
+  @SubscribeMessage('start-session')
+  async handleStartSession(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { session: string },
+  ): Promise<void> {
+    const user: User = (client?.handshake as any)?.user;
+    if (!user) {
+      this.logger.error('User not found');
+      client.emit('unauthorized');
+      return;
+    }
+    if (!data.session) {
+      this.logger.error('Session not found');
+      client.emit('session_not_found');
+      return;
+    }
+    const currentSession = await this.findSession(data.session);
+    if (user.id === currentSession.creator.id) {
+      this.logger.log(
+        `Start session: ${JSON.stringify(
+          data,
+        )}, currentSession: ${JSON.stringify(currentSession)}`,
+      );
+      await this.updateSession(data.session, SessionStatus.STARTED);
+    }
   }
 
   handleConnection(@ConnectedSocket() client: Socket, ...args: any[]): any {
@@ -51,18 +81,18 @@ export class SessionGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  async registerSession(client: Socket, username: string) {
-    const session = await this.findSession(this.session_id);
+  async registerSession(client: Socket, username: string, session_id: string) {
+    const session = await this.findSession(session_id);
     if (!session) {
       this.logger.error(
-        `Session not found: ${this.session_id} => Disconnecting client...`,
+        `Session not found: ${session_id} => Disconnecting client...`,
       );
       client.emit('session_not_found');
     } else {
       this.logger.log(`Session found: ${JSON.stringify(session)}`);
       const user = await this.registerGuestUser(username);
       this.logger.log(`User registered: ${JSON.stringify(user)}`);
-      this.registerParticipation(user, session, client);
+      await this.registerParticipation(user, session, client);
     }
   }
 
@@ -84,6 +114,12 @@ export class SessionGateway
       quiz: session.quiz,
       user: user,
       clientId: client.id,
+    });
+  }
+
+  async updateSession(session_id: string, status: SessionStatus) {
+    return await this.sessionService.update(session_id, {
+      status,
     });
   }
 }

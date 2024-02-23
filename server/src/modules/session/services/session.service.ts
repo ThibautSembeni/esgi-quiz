@@ -6,6 +6,7 @@ import { CreateSessionDto } from '../dto/create-session.dto';
 import { User } from '../../user/entities/user.entity';
 import Sqids from 'sqids';
 import { Quiz } from '../../quiz/entities/quiz.entity';
+import { UpdateSessionDto } from '../dto/update-session.dto';
 
 @Injectable()
 export class SessionService {
@@ -38,7 +39,14 @@ export class SessionService {
   async findOne(options: FindOneOptions<Session>): Promise<Session> {
     return await this.sessionRepository.findOne({
       ...options,
-      relations: ['quiz'],
+      relations: ['quiz', 'creator'],
     });
+  }
+
+  async update(
+    id: string,
+    updateSessionDto: UpdateSessionDto,
+  ): Promise<Session> {
+    return await this.sessionRepository.save({ id, ...updateSessionDto });
   }
 }
