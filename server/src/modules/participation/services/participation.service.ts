@@ -50,4 +50,10 @@ export class ParticipationService {
   ): Promise<Participation> {
     return await this.participationRepository.findOne(options);
   }
+
+  async findMany(
+    options: FindManyOptions<Participation>,
+  ): Promise<Participation[]> {
+    return await this.participationRepository.find(options);
+  }
 }

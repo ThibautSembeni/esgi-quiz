@@ -4,17 +4,27 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-
+import { Question } from "@/interfaces";
+import QuestionComponent from "@/components/molecules/question";
 export default function Session() {
   const router = useRouter();
   const params = useSearchParams();
   const { isAuthenticated, user } = useAuth();
   const sessionId = params.get("session");
-  const currentSocket: React.MutableRefObject<undefined | Socket> =
-    useRef(null);
+  const currentSocket = useRef<Socket>();
   const [username, setUsername] = useState<string | null>(null);
   const [membersCount, setMembersCount] = useState<number>(0);
   const [sessionStatus, setSessionStatus] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [results, setResults] = useState<{
+    correct_answer: boolean;
+    results: {
+      optionTitle: string;
+      count: number;
+      isCorrect: boolean;
+    }[];
+  }>();
   useEffect(() => {
     const socket = io(
       `${process.env.NEXT_PUBLIC_API_URL}/session${
@@ -48,6 +58,26 @@ export default function Session() {
     socket.on("session-started", () => {
       console.log("session-started");
       setSessionStatus("started");
+    });
+
+    socket.on("session-finish", () => {
+      console.log("session-finish");
+      setSessionStatus("finish");
+    });
+
+    socket.on("question-sent", (question: Question) => {
+      console.log("question-sent", question);
+      setCurrentQuestion(question);
+      setResults(null);
+    });
+
+    socket.on("countdown", (data) => {
+      console.log("countdown", data);
+      setCountdown(data);
+    });
+
+    socket.on("results-sent", (data) => {
+      setResults(data);
     });
 
     return () => {
@@ -129,9 +159,16 @@ export default function Session() {
               </blockquote>
             )}
           {sessionStatus === "started" && (
-            <blockquote className="text-center text-xl font-semibold leading-8 text-gray-900 sm:text-2xl sm:leading-9">
-              <p>Le quiz a commencé</p>
-            </blockquote>
+            <>
+              {currentQuestion && (
+                <QuestionComponent
+                  socket={currentSocket.current}
+                  question={currentQuestion}
+                  countdown={countdown}
+                  results={results}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

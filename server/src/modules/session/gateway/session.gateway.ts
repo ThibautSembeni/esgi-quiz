@@ -18,6 +18,10 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { WsJwtStrategy } from '../../auth/ws-jwt.strategy';
 import { WsJwtAuthGuard } from '../../auth/ws-jwt-auth.guard';
 import { session } from 'passport';
+import { QuestionService } from '../../question/services/question.service';
+import { Question } from '../../question/entities/question.entity';
+import { AnswerService } from '../../answer/services/answer.service';
+import { OptionService } from '../../option/services/option.service';
 
 @WebSocketGateway({ cors: true, namespace: 'session' })
 export class SessionGateway
@@ -34,6 +38,12 @@ export class SessionGateway
     private readonly userService: UserService,
     @Inject(ParticipationService)
     private readonly participationService: ParticipationService,
+    @Inject(QuestionService)
+    private readonly questionService: QuestionService,
+    @Inject(AnswerService)
+    private readonly answerService: AnswerService,
+    @Inject(OptionService)
+    private readonly optionService: OptionService,
   ) {}
 
   @SubscribeMessage('join')
@@ -67,7 +77,7 @@ export class SessionGateway
     const currentSession = await this.findSession(data.session);
     if (user.id === currentSession.creator.id) {
       await this.updateSession(data.session, SessionStatus.STARTED);
-      this.server.emit('session-started');
+      this.launchQuizWorkflow(data.session);
     }
   }
 
@@ -92,6 +102,29 @@ export class SessionGateway
     if (user.id === currentSession.creator.id) {
       await this.updateSession(data.session, SessionStatus.FINISH);
     }
+  }
+
+  @SubscribeMessage('answer-question')
+  async handleReceiveAnswer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { option_id: number; question_id: number },
+  ): Promise<void> {
+    console.log('client id', client.id);
+    this.logger.log(`Payload: ${JSON.stringify(data)}`);
+    const participation = await this.getParticipation(client);
+    console.log('Participation: ', participation);
+    const question = await this.questionService.findOne({
+      where: { id: data.question_id },
+    });
+    const option = await this.optionService.findOne({
+      where: { id: data.option_id },
+    });
+
+    await this.answerService.create({
+      participation: participation,
+      question: question,
+      option: option,
+    });
   }
 
   handleConnection(@ConnectedSocket() client: Socket, ...args: any[]): any {
@@ -154,6 +187,7 @@ export class SessionGateway
   async getSession(session_id: string) {
     return await this.sessionService.findOne({
       where: { id: session_id },
+      relations: ['creator', 'quiz', 'quiz.questions'],
     });
   }
 
@@ -178,6 +212,63 @@ export class SessionGateway
       }
       const participantsCount = await this.getParticipantsCount(sessionId);
       this.server.emit('members-number', participantsCount);
+    }
+  }
+
+  async launchQuizWorkflow(session_id: string) {
+    this.server.emit('session-started');
+    const session = await this.getSession(session_id);
+    const questions = await this.questionService.findManyOfQuiz(session.quiz);
+    for (const question of questions) {
+      await this.sendQuestionToParticipants(question);
+      await this.sendResultsToParticipants(session_id, question);
+    }
+    await this.updateSession(session_id, SessionStatus.FINISH);
+  }
+
+  async sendQuestionToParticipants(question: Question) {
+    this.server.emit('question-sent', question);
+    let countdown = question.duration;
+    await new Promise((resolve) => {
+      const countdownInterval = setInterval(() => {
+        this.server.emit('countdown', countdown);
+        countdown--;
+        if (countdown < 0) {
+          clearInterval(countdownInterval);
+          resolve(null);
+        }
+      }, 1000);
+    });
+  }
+
+  async sendResultsToParticipants(session_id: string, question: Question) {
+    const participations = await this.participationService.findMany({
+      where: { session: { id: session_id } },
+    });
+    const results = await this.answerService.countAnswersByQuestion(
+      question.id,
+      session_id,
+    );
+    for (const participation of participations) {
+      const answer = await this.answerService.findOne({
+        where: { participation: { id: participation.id }, question: question },
+        relations: ['option'],
+      });
+      this.server.to(participation.clientId).emit('results-sent', {
+        correct_answer: answer.option.is_correct,
+        results,
+      });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+  }
+
+  async sendToAllClients(session_id: string, message: string, data: any) {
+    const participations = await this.participationService.findMany({
+      where: { session: { id: session_id } },
+    });
+    console.log('Participations: ', participations);
+    for (const participation of participations) {
+      this.server.to(participation.clientId).emit(message, data);
     }
   }
 }

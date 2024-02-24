@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Option } from '../entities/option.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { CreateOptionDto } from '../dto/create-option-dto';
 import { Question } from '../../question/entities/question.entity';
 
@@ -23,5 +23,9 @@ export class OptionService {
     const option = this.optionRepository.create({ ...optionDto, question });
     await this.optionRepository.save(option);
     return option;
+  }
+
+  async findOne(options: FindOneOptions<Option>): Promise<Option> {
+    return await this.optionRepository.findOne(options);
   }
 }

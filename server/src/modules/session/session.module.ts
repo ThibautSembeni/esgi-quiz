@@ -11,6 +11,9 @@ import { ParticipationService } from '../participation/services/participation.se
 import { ParticipationModule } from '../participation/participation.module';
 import { UserService } from '../user/services/user.service';
 import { UserModule } from '../user/user.module';
+import { QuestionModule } from '../question/question.module';
+import { AnswerModule } from '../answer/answer.module';
+import { OptionModule } from '../option/option.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { UserModule } from '../user/user.module';
     QuizModule,
     UserModule,
     ParticipationModule,
+    QuestionModule,
+    AnswerModule,
+    OptionModule,
   ],
   controllers: [SessionController],
   providers: [

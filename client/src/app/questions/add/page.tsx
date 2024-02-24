@@ -23,6 +23,7 @@ export default function AddQuestion() {
       title: data.title,
       quiz: data.quiz,
       options: options,
+      duration: data.duration || 30,
     };
 
     const response = await fetch(
@@ -85,6 +86,24 @@ export default function AddQuestion() {
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder={"Quelle est la capitale de la France ?"}
                   required={true}
+                />
+              </div>
+            </div>
+            <div className="col-span-4">
+              <label
+                htmlFor="duration"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Temps de réponse (en secondes)
+              </label>
+              <div className="mt-2">
+                <input
+                  type="number"
+                  name="duration"
+                  id="duration"
+                  autoComplete="question-duration"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  placeholder={"30"}
                 />
               </div>
             </div>

@@ -51,4 +51,15 @@ export class QuestionService {
 
     return question;
   }
+
+  async findManyOfQuiz(quiz: Quiz): Promise<Question[]> {
+    return await this.questionRepository.find({
+      where: { quiz: quiz },
+      relations: ['options'],
+    });
+  }
+
+  async findOne(options: FindManyOptions<Question>): Promise<Question> {
+    return await this.questionRepository.findOne(options);
+  }
 }

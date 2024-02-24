@@ -25,4 +25,7 @@ export class Question {
 
   @OneToMany(() => Answer, (answer) => answer.question)
   answers: Answer[];
+
+  @Column()
+  duration: number = 30;
 }

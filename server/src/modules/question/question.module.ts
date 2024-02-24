@@ -18,5 +18,6 @@ import { QuizModule } from '../quiz/quiz.module';
       useClass: JwtAuthGuard,
     },
   ],
+  exports: [QuestionService],
 })
 export class QuestionModule {}
