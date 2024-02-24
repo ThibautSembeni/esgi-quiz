@@ -1,12 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
-import {QuestionService} from "../services/question.service";
+import { Controller, Get, Req } from '@nestjs/common';
+import { QuestionService } from '../services/question.service';
 
 @Controller('question')
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
   @Get()
-  async findAll() {
-    return await this.questionService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.questionService.findAll(req.user);
   }
 }

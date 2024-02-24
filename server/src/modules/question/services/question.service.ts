@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Question } from '../entities/question.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
+import { User } from '../../user/entities/user.entity';
 
 @Injectable()
 export class QuestionService {
@@ -10,7 +11,11 @@ export class QuestionService {
     private questionRepository: Repository<Question>,
   ) {}
 
-  async findAll(): Promise<Question[]> {
-    return await this.questionRepository.find();
+  async findAll(user: User): Promise<Question[]> {
+    return await this.questionRepository
+      .createQueryBuilder('question')
+      .innerJoinAndSelect('question.quiz', 'quiz')
+      .where('quiz.user = :userId', { userId: user.id })
+      .getMany();
   }
 }
