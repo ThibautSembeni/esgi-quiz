@@ -9,6 +9,7 @@ import { Session } from '../../session/entities/session.entity';
 import Sqids from 'sqids';
 import { CreateParticipationDto } from '../dto/create-participation.dto';
 import { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere';
+import { UpdateParticipationDto } from '../dto/update-participation.dto';
 
 @Injectable()
 export class ParticipationService {
@@ -55,5 +56,12 @@ export class ParticipationService {
     options: FindManyOptions<Participation>,
   ): Promise<Participation[]> {
     return await this.participationRepository.find(options);
+  }
+
+  async update(
+    id: number,
+    participation: UpdateParticipationDto,
+  ): Promise<Participation> {
+    return await this.participationRepository.save({ id, ...participation });
   }
 }

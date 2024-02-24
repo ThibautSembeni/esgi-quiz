@@ -25,6 +25,7 @@ export default function Session() {
       isCorrect: boolean;
     }[];
   }>();
+  const [scores, setScores] = useState<{ username: string; score: number }[]>();
   useEffect(() => {
     const socket = io(
       `${process.env.NEXT_PUBLIC_API_URL}/session${
@@ -60,9 +61,10 @@ export default function Session() {
       setSessionStatus("started");
     });
 
-    socket.on("session-finish", () => {
+    socket.on("session-finish", (data) => {
       console.log("session-finish");
       setSessionStatus("finish");
+      setScores(data);
     });
 
     socket.on("question-sent", (question: Question) => {
@@ -167,6 +169,26 @@ export default function Session() {
                   countdown={countdown}
                   results={results}
                 />
+              )}
+            </>
+          )}
+          {sessionStatus === "finish" && (
+            <>
+              {scores && (
+                <div>
+                  <h2 className="text-center text-xl font-semibold leading-8 text-gray-900 sm:text-2xl sm:leading-9">
+                    Résultats
+                  </h2>
+                  <ul>
+                    {scores.map((score, index) => (
+                      <li key={index}>
+                        <p>
+                          {score.username} - {score.score}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </>
           )}

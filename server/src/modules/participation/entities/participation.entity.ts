@@ -31,4 +31,7 @@ export class Participation {
 
   @Column()
   clientId: string;
+
+  @Column({ default: 0 })
+  score: number;
 }

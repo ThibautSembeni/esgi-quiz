@@ -107,7 +107,8 @@ export class SessionGateway
   @SubscribeMessage('answer-question')
   async handleReceiveAnswer(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { option_id: number; question_id: number },
+    @MessageBody()
+    data: { option_id: number; question_id: number; time_left: number },
   ): Promise<void> {
     console.log('client id', client.id);
     this.logger.log(`Payload: ${JSON.stringify(data)}`);
@@ -119,6 +120,21 @@ export class SessionGateway
     const option = await this.optionService.findOne({
       where: { id: data.option_id },
     });
+
+    const answerIsCorrect = option.is_correct;
+    if (answerIsCorrect) {
+      const scoreToAdd = data.time_left + 10;
+      participation.score += scoreToAdd;
+      await this.participationService.update(participation.id, {
+        score: participation.score,
+      });
+    } else {
+      const scoreToAdd = 10;
+      participation.score += scoreToAdd;
+      await this.participationService.update(participation.id, {
+        score: participation.score,
+      });
+    }
 
     await this.answerService.create({
       participation: participation,
@@ -224,6 +240,7 @@ export class SessionGateway
       await this.sendResultsToParticipants(session_id, question);
     }
     await this.updateSession(session_id, SessionStatus.FINISH);
+    await this.sendScoresToParticipants(session_id);
   }
 
   async sendQuestionToParticipants(question: Question) {
@@ -260,6 +277,18 @@ export class SessionGateway
       });
     }
     await new Promise((resolve) => setTimeout(resolve, 10000));
+  }
+
+  async sendScoresToParticipants(session_id: string) {
+    const participations = await this.participationService.findMany({
+      where: { session: { id: session_id } },
+      relations: ['user'],
+    });
+    const scores = participations.map((p) => ({
+      username: p.user.username,
+      score: p.score,
+    }));
+    this.server.emit('session-finish', scores);
   }
 
   async sendToAllClients(session_id: string, message: string, data: any) {

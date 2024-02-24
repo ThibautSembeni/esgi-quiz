@@ -36,6 +36,7 @@ export default function Question({
       socket.emit("answer-question", {
         option_id: selectAnswer,
         question_id: question.id,
+        time_left: countdown,
       });
     }
 
