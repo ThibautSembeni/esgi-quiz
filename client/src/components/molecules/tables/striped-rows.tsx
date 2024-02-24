@@ -12,6 +12,9 @@ export default function StripedRows({
   editButtonLabel,
   addingLink,
   editLink,
+  additionalButton,
+  additionalButtonLabel,
+  additionalButtonClickEvent,
 }: TableProps) {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -110,6 +113,17 @@ export default function StripedRows({
                           >
                             {editButtonLabel}
                           </Link>
+                        </td>
+                      )}
+                      {additionalButton && (
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
+                          <button
+                            type="button"
+                            className="text-indigo-600 hover:text-indigo-900"
+                            onClick={() => additionalButtonClickEvent(index)}
+                          >
+                            {additionalButtonLabel}
+                          </button>
                         </td>
                       )}
                     </tr>

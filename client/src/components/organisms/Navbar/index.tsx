@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const navigation = [
   { name: "Questions", href: "/questions" },
   { name: "Quiz", href: "/quiz" },
-  { name: "Mes fiches", href: "/cards" },
+  { name: "Sessions", href: "/session-list" },
 ];
 interface NavbarProps {
   className?: string;

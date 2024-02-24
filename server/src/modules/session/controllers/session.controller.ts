@@ -22,8 +22,13 @@ export class SessionController {
   ) {}
 
   @Get()
-  async findAll() {
-    return await this.sessionService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.sessionService.findAll({
+      where: {
+        creator: req.user,
+      },
+      relations: ['quiz', 'creator'],
+    });
   }
 
   @UseGuards(JwtAuthGuard)

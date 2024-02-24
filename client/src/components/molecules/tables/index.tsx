@@ -12,6 +12,9 @@ export interface TableProps {
   editButtonLabel?: string;
   addingLink?: string;
   editLink?: string;
+  additionalButton?: boolean;
+  additionalButtonLabel?: string;
+  additionalButtonClickEvent?: (item: any) => void;
 }
 export default function Table({
   type,
@@ -25,6 +28,9 @@ export default function Table({
   editButtonLabel,
   addingLink,
   editLink,
+  additionalButton,
+  additionalButtonLabel,
+  additionalButtonClickEvent,
 }: TableProps) {
   if (type === "striped rows") {
     return (
@@ -39,6 +45,9 @@ export default function Table({
         editButtonLabel={editButtonLabel}
         addingLink={addingLink}
         editLink={editLink}
+        additionalButton={additionalButton}
+        additionalButtonLabel={additionalButtonLabel}
+        additionalButtonClickEvent={additionalButtonClickEvent}
       />
     );
   }
