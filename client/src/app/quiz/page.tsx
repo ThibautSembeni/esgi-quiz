@@ -27,7 +27,7 @@ export default function Quiz() {
       <div className="relative isolate px-6 lg:px-8">
         <Table
           headersColumns={["Nom"]}
-          bodyRows={quiz.map((q) => q.name)}
+          bodyRows={quiz.map((q) => [q.name])}
           type="striped rows"
           title="Quiz"
           description="Liste des quiz"

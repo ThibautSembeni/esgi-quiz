@@ -107,12 +107,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(data);
           setIsAuthenticated(true);
           setError(null);
-        } else {
-          setError({ message: "Error while checking user" });
         }
       })
       .catch(() => {
-        setError({ message: "Error while checking user" });
         setIsAuthenticated(false);
       })
       .finally(() => {
