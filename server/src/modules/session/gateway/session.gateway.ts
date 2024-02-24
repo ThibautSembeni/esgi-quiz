@@ -43,6 +43,8 @@ export class SessionGateway
   ): Promise<void> {
     this.logger.log(`Payload: ${JSON.stringify(data)}`);
     await this.registerSession(client, data.username, data.session_id);
+    const participantsCount = await this.getParticipantsCount(data.session_id);
+    this.server.emit('members-number', participantsCount);
   }
 
   @UseGuards(WsJwtAuthGuard)
@@ -65,6 +67,7 @@ export class SessionGateway
     const currentSession = await this.findSession(data.session);
     if (user.id === currentSession.creator.id) {
       await this.updateSession(data.session, SessionStatus.STARTED);
+      this.server.emit('session-started');
     }
   }
 
@@ -95,8 +98,9 @@ export class SessionGateway
     this.logger.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(@ConnectedSocket() client: Socket): any {
+  async handleDisconnect(@ConnectedSocket() client: Socket): Promise<any> {
     this.logger.log(`Client disconnected: ${client.id}`);
+    await this.removeParticipantWhenSessionIsNotStarted(client);
   }
 
   async registerSession(client: Socket, username: string, session_id: string) {
@@ -139,5 +143,41 @@ export class SessionGateway
     return await this.sessionService.update(session_id, {
       status,
     });
+  }
+
+  async getParticipantsCount(session_id: string): Promise<number> {
+    return await this.participationService.count({
+      session: { id: session_id },
+    });
+  }
+
+  async getSession(session_id: string) {
+    return await this.sessionService.findOne({
+      where: { id: session_id },
+    });
+  }
+
+  async removeParticipation(client: Socket) {
+    return await this.participationService.deleteByClientId(client.id);
+  }
+
+  async getParticipation(client: Socket) {
+    return await this.participationService.findOne({
+      where: { clientId: client.id },
+      relations: ['session'],
+    });
+  }
+
+  async removeParticipantWhenSessionIsNotStarted(client: Socket) {
+    const participation = await this.getParticipation(client);
+    if (participation) {
+      const sessionId = participation.session.id;
+      const session = await this.getSession(sessionId);
+      if (session.status === SessionStatus.INACTIVE) {
+        await this.removeParticipation(client);
+      }
+      const participantsCount = await this.getParticipantsCount(sessionId);
+      this.server.emit('members-number', participantsCount);
+    }
   }
 }
