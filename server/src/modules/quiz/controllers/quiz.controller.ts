@@ -17,8 +17,8 @@ export class QuizController {
   constructor(private readonly quizService: QuizService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateQuizDto) {
-    return this.quizService.create(createUserDto);
+  create(@Body() createUserDto: CreateQuizDto, @Req() req: any) {
+    return this.quizService.create(createUserDto, req.user);
   }
 
   @Get()

@@ -1,5 +1,4 @@
 "use client";
-import Navbar from "@/components/organisms/Navbar";
 import React, { useEffect, useState } from "react";
 import Table from "@/components/molecules/tables";
 import { Quiz } from "@/interfaces";
@@ -25,8 +24,7 @@ export default function Quiz() {
 
   return (
     <div className="bg-white">
-      <Navbar />
-      <div className="relative isolate px-6 pt-14 lg:px-8">
+      <div className="relative isolate px-6 lg:px-8">
         <Table
           headersColumns={["Nom"]}
           bodyRows={quiz.map((q) => q.name)}

@@ -12,8 +12,8 @@ export class QuizService {
     private quizRepository: Repository<Quiz>,
   ) {}
 
-  async create(createQuizDto: CreateQuizDto): Promise<Quiz> {
-    return await this.quizRepository.save(createQuizDto);
+  async create(createQuizDto: CreateQuizDto, user: User): Promise<Quiz> {
+    return await this.quizRepository.save({ ...createQuizDto, user });
   }
 
   async findAll(options: FindManyOptions<Quiz>): Promise<Quiz[]> {

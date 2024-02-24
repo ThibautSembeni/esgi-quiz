@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 const navigation = [
-  { name: "Créer une fiche", href: "/card-creation" },
+  { name: "Questions", href: "/questions" },
   { name: "Quiz", href: "/quiz" },
   { name: "Mes fiches", href: "/cards" },
 ];
