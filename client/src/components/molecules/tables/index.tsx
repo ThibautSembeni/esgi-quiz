@@ -3,7 +3,7 @@ import StripedRows from "@/components/molecules/tables/striped-rows";
 export interface TableProps {
   type?: "striped rows";
   headersColumns: string[];
-  bodyRows: string[][];
+  bodyRows: (string | number)[][];
   title?: string;
   description?: string;
   addingButton?: boolean;

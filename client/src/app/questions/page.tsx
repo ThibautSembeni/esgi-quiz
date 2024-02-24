@@ -36,10 +36,10 @@ export default function Question() {
           description="Liste des questions disponibles."
           addingButton={true}
           addingButtonLabel="Ajouter une question"
-          addingLink="/question/add"
-          editButton={true}
+          addingLink="/questions/add"
+          editButton={false}
           editButtonLabel="Modifier un question"
-          editLink="/question/edit"
+          editLink="/questions/edit"
         />
       </div>
     </div>
