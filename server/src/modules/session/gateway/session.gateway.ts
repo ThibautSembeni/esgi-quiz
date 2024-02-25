@@ -52,9 +52,22 @@ export class SessionGateway
     @MessageBody() data: { session_id: string; username: string },
   ): Promise<void> {
     this.logger.log(`Payload: ${JSON.stringify(data)}`);
-    await this.registerSession(client, data.username, data.session_id);
+    const session = await this.findSession(data.session_id);
     const participantsCount = await this.getParticipantsCount(data.session_id);
-    this.server.emit('members-number', participantsCount);
+    if (!session) {
+      this.logger.error('Session not found');
+      client.emit('session_not_found');
+      return;
+    } else if (participantsCount > session.maxParticipants) {
+      this.logger.error('Session full');
+      client.emit('session_full');
+      return;
+    }
+    await this.registerSession(client, data.username, data.session_id);
+    const newParticipantsCount = await this.getParticipantsCount(
+      data.session_id,
+    );
+    this.server.emit('members-number', newParticipantsCount);
   }
 
   @UseGuards(WsJwtAuthGuard)

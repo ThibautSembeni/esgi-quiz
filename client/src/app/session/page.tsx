@@ -63,6 +63,13 @@ export default function Session() {
       router.push("/");
     });
 
+    socket.on("session_full", () => {
+      console.error("session pleine");
+      socket.close();
+      router.push("/");
+      toast("La session est pleine", { type: "error", autoClose: 3000 });
+    });
+
     socket.on("unauthorized", () => {
       console.log("Session unauthorized");
     });

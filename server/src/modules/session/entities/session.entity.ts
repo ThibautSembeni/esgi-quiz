@@ -38,4 +38,7 @@ export class Session {
 
   @Column({ nullable: true })
   creatorWsId: string;
+
+  @Column({ default: 10 })
+  maxParticipants: number;
 }
