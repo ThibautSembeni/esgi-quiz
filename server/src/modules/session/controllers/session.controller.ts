@@ -13,6 +13,7 @@ import { CreateQuizDto } from '../../quiz/dto/create-quiz.dto';
 import { CreateSessionDto } from '../dto/create-session.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { QuizService } from '../../quiz/services/quiz.service';
+import { SessionStatus } from '../entities/session.entity';
 
 @Controller('session')
 export class SessionController {
@@ -26,6 +27,7 @@ export class SessionController {
     return await this.sessionService.findAll({
       where: {
         creator: req.user,
+        status: SessionStatus.INACTIVE,
       },
       relations: ['quiz', 'creator'],
     });

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Question } from "@/interfaces";
 import QuestionComponent from "@/components/molecules/question";
+import { toast } from "react-toastify";
 export default function Session() {
   const router = useRouter();
   const params = useSearchParams();
@@ -59,10 +60,12 @@ export default function Session() {
     socket.on("session-started", () => {
       console.log("session-started");
       setSessionStatus("started");
+      toast("La session va commencer", { type: "info", autoClose: 3000 });
     });
 
     socket.on("session-finish", (data) => {
       console.log("session-finish");
+      toast("La session est terminé", { type: "info", autoClose: 3000 });
       setSessionStatus("finish");
       setScores(data);
     });
@@ -71,11 +74,17 @@ export default function Session() {
       console.log("question-sent", question);
       setCurrentQuestion(question);
       setResults(null);
+      toast("Nouvelle question", { type: "info", autoClose: 2000 });
     });
 
     socket.on("countdown", (data) => {
       console.log("countdown", data);
       setCountdown(data);
+      if (data <= 5)
+        toast(`Il ne reste plus que ${data} secondes pour répondre`, {
+          type: "warning",
+          autoClose: 1000,
+        });
     });
 
     socket.on("results-sent", (data) => {

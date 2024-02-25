@@ -169,7 +169,7 @@ export class SessionGateway
 
   async findSession(session_id: string) {
     return await this.sessionService.findOne({
-      where: { id: session_id },
+      where: { id: session_id, status: SessionStatus.INACTIVE },
     });
   }
 
