@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ParticipationService } from '../services/participation.service';
+import { Public } from '../../../constants';
 
 @Controller('participation')
 export class ParticipationController {

@@ -216,7 +216,9 @@ export class SessionGateway
 
   async getParticipantsCount(session_id: string): Promise<number> {
     return await this.participationService.count({
-      session: { id: session_id },
+      where: {
+        session: { id: session_id },
+      },
     });
   }
 

@@ -28,8 +28,8 @@ export class ParticipationService {
     return await this.participationRepository.save(participationDto);
   }
 
-  async count(options: FindOptionsWhere<Participation>): Promise<number> {
-    return await this.participationRepository.countBy(options);
+  async count(options: FindManyOptions<Participation>): Promise<number> {
+    return await this.participationRepository.count(options);
   }
 
   async deleteByClientId(id: string): Promise<void> {
