@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Question } from "@/interfaces";
 import QuestionComponent from "@/components/molecules/question";
 import { toast } from "react-toastify";
+import ResultManager from "@/components/molecules/manager-results";
 export default function Session() {
   const router = useRouter();
   const params = useSearchParams();
@@ -24,6 +25,20 @@ export default function Session() {
       optionTitle: string;
       count: number;
       isCorrect: boolean;
+    }[];
+  }>();
+  const [currentSessionResults, setCurrentSessionResults] = useState<{
+    questions: {
+      index: number;
+      title: string;
+    }[];
+    users: {
+      username: string;
+      score: number;
+      questions: {
+        index: number;
+        is_correct: boolean | null;
+      }[];
     }[];
   }>();
   const [scores, setScores] = useState<{ username: string; score: number }[]>();
@@ -89,6 +104,10 @@ export default function Session() {
 
     socket.on("results-sent", (data) => {
       setResults(data);
+    });
+
+    socket.on("current-session-results", (status) => {
+      setCurrentSessionResults(status);
     });
 
     return () => {
@@ -169,7 +188,7 @@ export default function Session() {
                 </button>{" "}
               </blockquote>
             )}
-          {sessionStatus === "started" && (
+          {sessionStatus === "started" && !isAuthenticated && (
             <>
               {currentQuestion && (
                 <QuestionComponent
@@ -181,6 +200,15 @@ export default function Session() {
               )}
             </>
           )}
+          {sessionStatus === "started" &&
+            isAuthenticated &&
+            user.roles === "user" && (
+              <>
+                {currentSessionResults && (
+                  <ResultManager results={currentSessionResults} />
+                )}
+              </>
+            )}
           {sessionStatus === "finish" && (
             <>
               {scores && (

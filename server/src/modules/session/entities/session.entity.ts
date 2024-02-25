@@ -35,4 +35,7 @@ export class Session {
 
   @OneToMany(() => Participation, (participation) => participation.session)
   participations: Participation[];
+
+  @Column({ nullable: true })
+  creatorWsId: string;
 }

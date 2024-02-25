@@ -76,7 +76,7 @@ export class SessionGateway
     }
     const currentSession = await this.findSession(data.session);
     if (user.id === currentSession.creator.id) {
-      await this.updateSession(data.session, SessionStatus.STARTED);
+      await this.updateSession(data.session, SessionStatus.STARTED, client.id);
       this.launchQuizWorkflow(data.session);
     }
   }
@@ -141,6 +141,8 @@ export class SessionGateway
       question: question,
       option: option,
     });
+
+    this.sendSessionsStatusToManager(participation.session.id);
   }
 
   handleConnection(@ConnectedSocket() client: Socket, ...args: any[]): any {
@@ -188,9 +190,14 @@ export class SessionGateway
     });
   }
 
-  async updateSession(session_id: string, status: SessionStatus) {
+  async updateSession(
+    session_id: string,
+    status: SessionStatus,
+    creatorWsId?: string,
+  ) {
     return await this.sessionService.update(session_id, {
       status,
+      creatorWsId,
     });
   }
 
@@ -235,6 +242,7 @@ export class SessionGateway
     this.server.emit('session-started');
     const session = await this.getSession(session_id);
     const questions = await this.questionService.findManyOfQuiz(session.quiz);
+    await this.sendSessionsStatusToManager(session_id);
     for (const question of questions) {
       await this.sendQuestionToParticipants(question);
       await this.sendResultsToParticipants(session_id, question);
@@ -272,7 +280,7 @@ export class SessionGateway
         relations: ['option'],
       });
       this.server.to(participation.clientId).emit('results-sent', {
-        correct_answer: answer.option.is_correct,
+        correct_answer: answer ? answer.option.is_correct : null,
         results,
       });
     }
@@ -291,13 +299,48 @@ export class SessionGateway
     this.server.emit('session-finish', scores);
   }
 
-  async sendToAllClients(session_id: string, message: string, data: any) {
+  async sendSessionsStatusToManager(session_id: string) {
+    const session = await this.sessionService.findOne({
+      where: { id: session_id },
+    });
+    const questions = await this.questionService.findManyOfQuiz(session.quiz);
     const participations = await this.participationService.findMany({
       where: { session: { id: session_id } },
+      relations: ['user'],
     });
-    console.log('Participations: ', participations);
-    for (const participation of participations) {
-      this.server.to(participation.clientId).emit(message, data);
-    }
+    const answers = await this.answerService.findMany({
+      where: { participation: { session: { id: session_id } } },
+      relations: ['option', 'question', 'participation'],
+    });
+    this.logger.log(`Participations: ${JSON.stringify(participations)}`);
+    console.log('answers', answers);
+    const payload = {
+      questions: questions.map((q, index) => ({
+        index: index + 1,
+        title: q.title,
+      })),
+      users: participations?.map((p) => ({
+        username: p.user.username,
+        score: p.score,
+        questions: questions.map((q, index) => {
+          const answer = answers.find(
+            (a) => a.participation.id === p.id && a.question.id === q.id,
+          );
+          return {
+            index: index + 1,
+            is_correct: !answer
+              ? null
+              : q.options
+                  .filter((o) => o.is_correct)
+                  .map((o) => ({
+                    id: o.id,
+                  }))[0].id === answer?.option?.id,
+          };
+        }),
+      })),
+    };
+    this.server
+      .to(session.creatorWsId)
+      .emit('current-session-results', payload);
   }
 }
