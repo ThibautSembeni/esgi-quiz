@@ -1,6 +1,7 @@
 # ESGI quiz
 
 Ce projet contient un fichier docker-compose.yml qui est configuré pour démarrer un service server utilisant Nest.js en mode développement, ainsi qu'une base de données PostgreSQL.
+Nous avons réalisé ce projet en pair programming, en utilisant la méthode de développement agile Scrum.
 
 ## Workflow du projet
 
@@ -139,7 +140,6 @@ Le manager de la session reçoit les questions et la liste des utilisateurs au d
   * **Différents types de questions** : Le système prend en charge plusieurs types de questions, tels que les QCM, les réponses courtes et les questions à choix multiples.
   * **Limite de temps** : Les utilisateurs peuvent avoir un temps limité pour répondre aux questions.
   * **Système de points** : Les utilisateurs reçoivent des points en fonction de leurs réponses correctes.
-
   3. Tableau de classement en temps réel
   * **Affichage des scores** : Le tableau de classement affiche les scores des utilisateurs en temps réel.
   * **Motivation des participants** : Le tableau de classement encourage les participants à faire de leur mieux.
